@@ -133,4 +133,3 @@ The installer:
 
 If a conflicting binding exists, remove or change it explicitly and rerun the
 installer. The installer does not modify unrelated bindings automatically.
-# tiler
