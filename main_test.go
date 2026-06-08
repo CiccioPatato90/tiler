@@ -64,3 +64,38 @@ func TestEqualWidths(t *testing.T) {
 		}
 	}
 }
+
+func TestCenterTarget(t *testing.T) {
+	tests := []struct {
+		name      string
+		count     int
+		focus     int
+		wantID    int64
+		wantFound bool
+	}{
+		{"one node", 1, 0, 0, false},
+		{"two nodes from left", 2, 0, 2, true},
+		{"two nodes already right", 2, 1, 0, false},
+		{"three nodes from left", 3, 0, 2, true},
+		{"three nodes already center", 3, 1, 0, false},
+		{"four nodes from right", 4, 3, 2, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			nodes := make([]Node, tt.count)
+			for i := range nodes {
+				nodes[i].ID = int64(i + 1)
+			}
+			nodes[tt.focus].Focused = true
+
+			target, found := (Workspace{Nodes: nodes}).CenterTarget()
+			if found != tt.wantFound {
+				t.Fatalf("CenterTarget() found = %v, want %v", found, tt.wantFound)
+			}
+			if target.ID != tt.wantID {
+				t.Fatalf("CenterTarget() ID = %d, want %d", target.ID, tt.wantID)
+			}
+		})
+	}
+}

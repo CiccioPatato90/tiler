@@ -6,7 +6,9 @@ workspace.
 It has two modes:
 
 - `tiler`: toggle between an equal layout and a layout where the focused node
-  is larger.
+  is larger. When expanding, the focused node is moved to the second tiled
+  position: the right side for two nodes and the center position for three or
+  more nodes.
 - `tiler --equal`: give every node the same width.
 
 The default Sway bindings installed by `install.sh` are:
@@ -46,7 +48,7 @@ The program models the relevant parts of Sway directly:
 
 - `Tree` contains the discovered workspaces.
 - `Workspace` owns layout decisions such as `TargetWidths`, `EqualWidths`,
-  `IsExpanded`, and `SetWidths`.
+  `IsExpanded`, `CenterFocus`, and `SetWidths`.
 - `Node` represents a Sway container and performs targeted resizing through
   its `con_id`.
 - `Rect` contains the dimensions reported by Sway.

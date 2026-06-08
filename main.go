@@ -85,6 +85,39 @@ func (w Workspace) EqualWidths() []float64 {
 	return widths
 }
 
+func (w Workspace) CenterTarget() (Node, bool) {
+	if len(w.Nodes) < 2 {
+		return Node{}, false
+	}
+
+	const centerIndex = 1
+	for i, node := range w.Nodes {
+		if node.Focused {
+			if i == centerIndex {
+				return Node{}, false
+			}
+			return w.Nodes[centerIndex], true
+		}
+	}
+
+	return Node{}, false
+}
+
+func (w Workspace) CenterFocus() error {
+	target, ok := w.CenterTarget()
+	if !ok {
+		return nil
+	}
+
+	for _, node := range w.Nodes {
+		if node.Focused {
+			return node.SwapWith(target)
+		}
+	}
+
+	return nil
+}
+
 func (w Workspace) IsExpanded() bool {
 	n := len(w.Nodes)
 	if n < 2 {
@@ -154,6 +187,19 @@ func (n Node) SetWidth(width float64) error {
 	return nil
 }
 
+func (n Node) SwapWith(target Node) error {
+	command := fmt.Sprintf(
+		"[con_id=%d] swap container with con_id %d",
+		n.ID,
+		target.ID,
+	)
+	out, err := exec.Command("swaymsg", command).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("swap node %d with node %d: %s: %w", n.ID, target.ID, out, err)
+	}
+	return nil
+}
+
 func getTree() (Tree, error) {
 	out, err := exec.Command("swaymsg", "-t", "get_tree").Output()
 	if err != nil {
@@ -204,6 +250,11 @@ func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--equal" {
 		widths = f.EqualWidths()
 	} else {
+		if !f.IsExpanded() {
+			if err := f.CenterFocus(); err != nil {
+				log.Fatal(err)
+			}
+		}
 		widths = f.TargetWidths()
 	}
 
